@@ -24,3 +24,29 @@ contract aceII {
     address public immutable governor;
     address public immutable feeSink;
     address public immutable fallbackKeeper;
+
+    // -------------------------------------------------------------------------
+    // Mutable state
+    // -------------------------------------------------------------------------
+
+    uint256 public protocolFeeBps;
+    uint256 public lastSnapshotBlock;
+    uint256 public curveKinkUtil;
+    uint256 public curveSlopeBelow;
+    uint256 public curveSlopeAbove;
+    uint256 public baseRatePerSecRay;
+
+    // -------------------------------------------------------------------------
+    // Errors (unique to this contract)
+    // -------------------------------------------------------------------------
+
+    error AceII_DenomZero();
+    error AceII_Overflow();
+    error AceII_NotGovernor();
+    error AceII_NotKeeper();
+    error AceII_RateOutOfBounds();
+    error AceII_UtilOutOfRange();
+    error AceII_PeriodsTooHigh();
+    error AceII_BpsOverHundred();
+
+    // -------------------------------------------------------------------------
