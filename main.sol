@@ -154,3 +154,29 @@ contract aceII {
     }
 
     // -------------------------------------------------------------------------
+    // Pure: kinked borrow rate (per second, ray)
+    // -------------------------------------------------------------------------
+
+    function borrowRatePerSecRay(
+        uint256 totalCash,
+        uint256 totalBorrows,
+        uint256 kinkUtil,
+        uint256 slopeBelow,
+        uint256 slopeAbove,
+        uint256 baseRay
+    ) public pure returns (uint256) {
+        uint256 u = utilizationRay(totalCash, totalBorrows);
+        if (u == 0) return baseRay;
+        if (u <= kinkUtil) {
+            uint256 factor = rayDiv(u, kinkUtil);
+            return baseRay + rayMul(slopeBelow, factor);
+        }
+        uint256 excess = u - kinkUtil;
+        uint256 denom = RAY_SCALE - kinkUtil;
+        if (denom == 0) return baseRay + slopeBelow;
+        uint256 factor = rayDiv(excess, denom);
+        return baseRay + slopeBelow + rayMul(slopeAbove, factor);
+    }
+
+    function currentBorrowRateRay(uint256 totalCash, uint256 totalBorrows) external view returns (uint256) {
+        return borrowRatePerSecRay(
