@@ -206,3 +206,29 @@ contract aceII {
         if (periodsPerYear > PERIODS_CAP) revert AceII_PeriodsTooHigh();
         uint256 onePlusR = RAY_SCALE + rayDiv(aprRay, periodsPerYear);
         uint256 compounded = rayPow(onePlusR, periodsPerYear);
+        if (compounded < RAY_SCALE) return 0;
+        return compounded - RAY_SCALE;
+    }
+
+    // -------------------------------------------------------------------------
+    // Pure: future value (ray) — principal * (1 + rate)^periods
+    // -------------------------------------------------------------------------
+
+    function futureValueRay(
+        uint256 principalRay,
+        uint256 ratePerPeriodRay,
+        uint256 periods
+    ) public pure returns (uint256) {
+        if (periods == 0) return principalRay;
+        uint256 onePlusR = RAY_SCALE + ratePerPeriodRay;
+        uint256 factor = rayPow(onePlusR, periods);
+        return rayMul(principalRay, factor);
+    }
+
+    // -------------------------------------------------------------------------
+    // Pure: present value (ray) — futureValue / (1 + rate)^periods
+    // -------------------------------------------------------------------------
+
+    function presentValueRay(
+        uint256 futureValueRay,
+        uint256 ratePerPeriodRay,
