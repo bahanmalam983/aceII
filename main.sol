@@ -310,3 +310,29 @@ contract aceII {
     // -------------------------------------------------------------------------
 
     function isUtilAboveFloor(uint256 utilRay) public pure returns (bool) {
+        return utilRay >= FLOOR_UTIL;
+    }
+
+    // -------------------------------------------------------------------------
+    // Pure: scale amount to ray (for external inputs)
+    // -------------------------------------------------------------------------
+
+    function toRay(uint256 amount, uint8 decimals) public pure returns (uint256) {
+        if (decimals >= 27) return amount / (10 ** (decimals - 27));
+        return amount * (10 ** (27 - decimals));
+    }
+
+    function fromRay(uint256 amountRay, uint8 decimals) public pure returns (uint256) {
+        if (decimals >= 27) return amountRay * (10 ** (decimals - 27));
+        return amountRay / (10 ** (27 - decimals));
+    }
+
+    // -------------------------------------------------------------------------
+    // Pure: continuous compounding approximation (e^(r*t) in ray)
+    // -------------------------------------------------------------------------
+
+    function continuousCompoundRay(uint256 ratePerSecRay, uint256 secondsElapsed) public pure returns (uint256) {
+        if (secondsElapsed == 0) return RAY_SCALE;
+        uint256 rt = rayMul(ratePerSecRay, secondsElapsed);
+        if (rt == 0) return RAY_SCALE;
+        return compoundExpApprox(rt);
