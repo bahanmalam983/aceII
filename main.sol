@@ -50,3 +50,29 @@ contract aceII {
     error AceII_BpsOverHundred();
 
     // -------------------------------------------------------------------------
+    // Events (unique naming)
+    // -------------------------------------------------------------------------
+
+    event CurveParamsUpdated(uint256 kinkUtil, uint256 slopeBelow, uint256 slopeAbove, uint256 baseRay);
+    event YieldSnapshot(uint256 indexed epoch, uint256 aprRay, uint256 apyRay, uint256 utilRay);
+    event FeeBpsChanged(uint256 previousBps, uint256 newBps);
+    event KeeperSnapshot(uint256 blockNum, uint256 borrowRateRay);
+
+    // -------------------------------------------------------------------------
+    // Constructor — authority and sinks set at deploy; no args required
+    // -------------------------------------------------------------------------
+
+    constructor() {
+        governor = msg.sender;
+        feeSink = address(0x8A3fC2d1E9b4F7a0c6D2e5B8f1A3d9C7e4F0b2A);
+        fallbackKeeper = address(0x2F7e1B9c4A6d0E8f3a5C2b7D1e9F4A0c6B3d8E5);
+        protocolFeeBps = 25;
+        curveKinkUtil = 0.80e27;
+        curveSlopeBelow = 0.04e27;
+        curveSlopeAbove = 0.60e27;
+        baseRatePerSecRay = 1584407172113525096151; // ~5% APR in per-second ray
+        lastSnapshotBlock = block.number;
+    }
+
+    // -------------------------------------------------------------------------
+    // Modifiers
