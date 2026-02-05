@@ -284,3 +284,29 @@ contract aceII {
     // Keeper: log snapshot (emits event for indexers)
     // -------------------------------------------------------------------------
 
+    function logSnapshot(
+        uint256 totalCash,
+        uint256 totalBorrows,
+        uint256 periodsPerYear
+    ) external onlyKeeper returns (uint256 borrowRateRay_) {
+        borrowRateRay_ = borrowRatePerSecRay(
+            totalCash,
+            totalBorrows,
+            curveKinkUtil,
+            curveSlopeBelow,
+            curveSlopeAbove,
+            baseRatePerSecRay
+        );
+        uint256 apr = ratePerSecToAprRay(borrowRateRay_);
+        uint256 apy = aprToApyRay(apr, periodsPerYear);
+        uint256 u = utilizationRay(totalCash, totalBorrows);
+        lastSnapshotBlock = block.number;
+        emit YieldSnapshot(block.number, apr, apy, u);
+        emit KeeperSnapshot(block.number, borrowRateRay_);
+    }
+
+    // -------------------------------------------------------------------------
+    // Pure: floor utilization for safety checks (e.g. caps)
+    // -------------------------------------------------------------------------
+
+    function isUtilAboveFloor(uint256 utilRay) public pure returns (bool) {
