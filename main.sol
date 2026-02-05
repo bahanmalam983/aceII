@@ -232,3 +232,29 @@ contract aceII {
     function presentValueRay(
         uint256 futureValueRay,
         uint256 ratePerPeriodRay,
+        uint256 periods
+    ) public pure returns (uint256) {
+        if (periods == 0) return futureValueRay;
+        uint256 onePlusR = RAY_SCALE + ratePerPeriodRay;
+        if (onePlusR == 0) revert AceII_DenomZero();
+        uint256 factor = rayPow(onePlusR, periods);
+        return rayDiv(futureValueRay, factor);
+    }
+
+    // -------------------------------------------------------------------------
+    // Pure: effective yield after deducting fee (ray)
+    // -------------------------------------------------------------------------
+
+    function yieldAfterFeeRay(uint256 grossYieldRay, uint256 feeBps) public pure returns (uint256) {
+        if (feeBps > 10_000) revert AceII_BpsOverHundred();
+        uint256 feeRay = rayMul(grossYieldRay, (feeBps * RAY_SCALE) / 10_000);
+        return grossYieldRay - feeRay;
+    }
+
+    // -------------------------------------------------------------------------
+    // View: full yield summary for a given reserve
+    // -------------------------------------------------------------------------
+
+    function yieldSummary(
+        uint256 totalCash,
+        uint256 totalBorrows,
