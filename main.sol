@@ -180,3 +180,29 @@ contract aceII {
 
     function currentBorrowRateRay(uint256 totalCash, uint256 totalBorrows) external view returns (uint256) {
         return borrowRatePerSecRay(
+            totalCash,
+            totalBorrows,
+            curveKinkUtil,
+            curveSlopeBelow,
+            curveSlopeAbove,
+            baseRatePerSecRay
+        );
+    }
+
+    // -------------------------------------------------------------------------
+    // Pure: APR (per year) from per-second rate in ray
+    // -------------------------------------------------------------------------
+
+    function ratePerSecToAprRay(uint256 ratePerSecRay) public pure returns (uint256) {
+        return rayMul(ratePerSecRay, SECONDS_PER_YEAR);
+    }
+
+    // -------------------------------------------------------------------------
+    // Pure: APY from APR with compounding periods per year (ray)
+    // -------------------------------------------------------------------------
+
+    function aprToApyRay(uint256 aprRay, uint256 periodsPerYear) public pure returns (uint256) {
+        if (periodsPerYear == 0) revert AceII_DenomZero();
+        if (periodsPerYear > PERIODS_CAP) revert AceII_PeriodsTooHigh();
+        uint256 onePlusR = RAY_SCALE + rayDiv(aprRay, periodsPerYear);
+        uint256 compounded = rayPow(onePlusR, periodsPerYear);
