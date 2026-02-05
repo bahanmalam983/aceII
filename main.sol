@@ -336,3 +336,21 @@ contract aceII {
         uint256 rt = rayMul(ratePerSecRay, secondsElapsed);
         if (rt == 0) return RAY_SCALE;
         return compoundExpApprox(rt);
+    }
+
+    /// @dev Second-order Taylor approximation: e^x ≈ 1 + x + x²/2 in ray space.
+    function compoundExpApprox(uint256 xRay) public pure returns (uint256) {
+        if (xRay == 0) return RAY_SCALE;
+        uint256 linear = xRay;
+        uint256 quadratic = rayMul(xRay, xRay) / 2;
+        return RAY_SCALE + linear + quadratic;
+    }
+
+    // -------------------------------------------------------------------------
+    // View: fee amount in ray for a given gross yield
+    // -------------------------------------------------------------------------
+
+    function protocolFeeRay(uint256 grossYieldRay) external view returns (uint256) {
+        return rayMul(grossYieldRay, (protocolFeeBps * RAY_SCALE) / 10_000);
+    }
+}
