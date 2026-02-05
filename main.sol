@@ -102,3 +102,29 @@ contract aceII {
         if (baseRay_ > MAX_RATE_PERCENT) revert AceII_RateOutOfBounds();
         curveKinkUtil = kinkUtil_;
         curveSlopeBelow = slopeBelow_;
+        curveSlopeAbove = slopeAbove_;
+        baseRatePerSecRay = baseRay_;
+        emit CurveParamsUpdated(kinkUtil_, slopeBelow_, slopeAbove_, baseRay_);
+    }
+
+    function setProtocolFeeBps(uint256 bps) external onlyGovernor {
+        if (bps > 10_000) revert AceII_BpsOverHundred();
+        uint256 prev = protocolFeeBps;
+        protocolFeeBps = bps;
+        emit FeeBpsChanged(prev, bps);
+    }
+
+    // -------------------------------------------------------------------------
+    // Pure: ray math helpers
+    // -------------------------------------------------------------------------
+
+    function rayMul(uint256 a, uint256 b) public pure returns (uint256) {
+        if (a == 0 || b == 0) return 0;
+        uint256 c = a * b;
+        if (c / a != b) revert AceII_Overflow();
+        return c / RAY_SCALE;
+    }
+
+    function rayDiv(uint256 a, uint256 b) public pure returns (uint256) {
+        if (b == 0) revert AceII_DenomZero();
+        return (a * RAY_SCALE) / b;
