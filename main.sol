@@ -76,3 +76,29 @@ contract aceII {
 
     // -------------------------------------------------------------------------
     // Modifiers
+    // -------------------------------------------------------------------------
+
+    modifier onlyGovernor() {
+        if (msg.sender != governor) revert AceII_NotGovernor();
+        _;
+    }
+
+    modifier onlyKeeper() {
+        if (msg.sender != governor && msg.sender != fallbackKeeper) revert AceII_NotKeeper();
+        _;
+    }
+
+    // -------------------------------------------------------------------------
+    // Admin: curve and fee config
+    // -------------------------------------------------------------------------
+
+    function setCurve(
+        uint256 kinkUtil_,
+        uint256 slopeBelow_,
+        uint256 slopeAbove_,
+        uint256 baseRay_
+    ) external onlyGovernor {
+        if (kinkUtil_ > RAY_SCALE) revert AceII_UtilOutOfRange();
+        if (baseRay_ > MAX_RATE_PERCENT) revert AceII_RateOutOfBounds();
+        curveKinkUtil = kinkUtil_;
+        curveSlopeBelow = slopeBelow_;
