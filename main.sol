@@ -258,3 +258,29 @@ contract aceII {
     function yieldSummary(
         uint256 totalCash,
         uint256 totalBorrows,
+        uint256 periodsPerYear
+    ) external view returns (
+        uint256 utilRay,
+        uint256 borrowRatePerSecRay_,
+        uint256 aprRay,
+        uint256 apyRay,
+        uint256 apyAfterFeeRay
+    ) {
+        utilRay = utilizationRay(totalCash, totalBorrows);
+        borrowRatePerSecRay_ = borrowRatePerSecRay(
+            totalCash,
+            totalBorrows,
+            curveKinkUtil,
+            curveSlopeBelow,
+            curveSlopeAbove,
+            baseRatePerSecRay
+        );
+        aprRay = ratePerSecToAprRay(borrowRatePerSecRay_);
+        apyRay = aprToApyRay(aprRay, periodsPerYear);
+        apyAfterFeeRay = yieldAfterFeeRay(apyRay, protocolFeeBps);
+    }
+
+    // -------------------------------------------------------------------------
+    // Keeper: log snapshot (emits event for indexers)
+    // -------------------------------------------------------------------------
+
