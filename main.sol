@@ -128,3 +128,29 @@ contract aceII {
     function rayDiv(uint256 a, uint256 b) public pure returns (uint256) {
         if (b == 0) revert AceII_DenomZero();
         return (a * RAY_SCALE) / b;
+    }
+
+    function rayPow(uint256 x, uint256 n) public pure returns (uint256) {
+        if (n == 0) return RAY_SCALE;
+        if (n == 1) return x;
+        uint256 z = x;
+        for (uint256 i = 2; i <= n; i++) {
+            z = rayMul(z, x);
+        }
+        return z;
+    }
+
+    // -------------------------------------------------------------------------
+    // Pure: utilization (ray)
+    // -------------------------------------------------------------------------
+
+    function utilizationRay(
+        uint256 totalCash,
+        uint256 totalBorrows
+    ) public pure returns (uint256) {
+        if (totalCash == 0 && totalBorrows == 0) return 0;
+        if (totalCash == 0) return RAY_SCALE;
+        return rayDiv(totalBorrows, totalCash + totalBorrows);
+    }
+
+    // -------------------------------------------------------------------------
